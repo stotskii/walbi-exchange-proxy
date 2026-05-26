@@ -7,15 +7,19 @@
 #     root * /srv/walbi-exchange
 #     encode zstd gzip
 #
-#     # → real backend
+#     # → real backend (REST)
 #     handle /api/* {
 #         reverse_proxy walbi-exchange-proxy:3002
 #     }
-#     handle /ws {
-#         reverse_proxy walbi-exchange-proxy:3002 {
-#             header_up Connection {>Connection}
-#             header_up Upgrade {>Upgrade}
-#         }
+#     # → real backend (WS) — matcher must check Upgrade header so Caddy
+#     # actually upgrades; a plain `handle /ws` does NOT trigger WS upgrade.
+#     @ws {
+#         path /ws
+#         header Connection *Upgrade*
+#         header Upgrade websocket
+#     }
+#     handle @ws {
+#         reverse_proxy walbi-exchange-proxy:3002
 #     }
 #
 #     # SPA static assets (existing rules) — only matches when nothing above did
