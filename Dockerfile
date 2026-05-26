@@ -8,7 +8,7 @@ RUN corepack enable
 
 COPY package.json ./
 COPY pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile || pnpm install
+RUN pnpm config set strict-peer-dependencies false && pnpm install --frozen-lockfile --ignore-scripts || pnpm install --ignore-scripts
 
 COPY tsconfig.json ./
 COPY src ./src
