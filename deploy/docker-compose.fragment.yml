@@ -1,0 +1,21 @@
+# Drop into /root/server/docker-compose.shared.yml (under `services:`).
+# Then run:
+#   docker compose -f docker-compose.shared.yml -f docker-compose.prod.yml up -d walbi-exchange-proxy
+#
+# Image is built locally on the server via deploy.sh.
+
+  walbi-exchange-proxy:
+    image: walbi-exchange-proxy:dev
+    container_name: walbi-exchange-proxy
+    restart: unless-stopped
+    env_file:
+      - /root/secrets/walbi-exchange-proxy.env
+    networks:
+      - frontend
+    # No host port published; reachable only via Docker network.
+    # Caddy at exchange.walbi.cfd proxies /api/* and /ws here.
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
